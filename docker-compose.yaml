@@ -9,9 +9,10 @@ services:
       LOG_LEVEL: "INFO"
     volumes:
       - ./data/cache:/root/.cache
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: "4"
-    #       memory: 4G
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
     restart: unless-stopped

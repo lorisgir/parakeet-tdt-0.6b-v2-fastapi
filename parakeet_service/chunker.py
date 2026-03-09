@@ -30,8 +30,12 @@ MAX_SEC            = 70          # never exceed this in one chunk
 TRAIL_SIL_MS       = 300         # keep ≥300 ms silence at cut point
 THRESH             = 0.60        # stricter prob threshold
 
-def vad_chunk_lowmem(path: pathlib.Path) -> List[pathlib.Path]:
-    """Low-memory VAD chunking for non-streaming processing"""
+def vad_chunk_lowmem(path: pathlib.Path) -> list:
+    """Low-memory VAD chunking for non-streaming processing
+    
+    Returns:
+        List[Tuple[pathlib.Path, float]]: List of (chunk_path, offset_seconds) tuples
+    """
     import librosa
     
     # Get audio file info
@@ -52,6 +56,7 @@ def vad_chunk_lowmem(path: pathlib.Path) -> List[pathlib.Path]:
     current_chunk = bytearray()
     chunks = []
     speech_ms = 0
+    chunk_start_sample = 0
     
     # Process audio in chunks
     for chunk_start in range(0, int(duration * SAMPLE_RATE), STRIPE_FRAMES):
@@ -73,6 +78,10 @@ def vad_chunk_lowmem(path: pathlib.Path) -> List[pathlib.Path]:
             if len(window) < 512:
                 break
                 
+            # Track start of new chunk
+            if not current_chunk:
+                chunk_start_sample = chunk_start + i
+                
             # Convert to float for VAD
             window_f32 = window.astype(np.float32) / 32768
             evt = vad_iter(window_f32)
@@ -84,13 +93,15 @@ def vad_chunk_lowmem(path: pathlib.Path) -> List[pathlib.Path]:
             # Check if we should finalize chunk
             if (evt and evt.get("end")) or speech_ms >= MAX_CHUNK_MS:
                 if current_chunk:
-                    chunks.append(_flush(current_chunk))
+                    offset_seconds = chunk_start_sample / SAMPLE_RATE
+                    chunks.append((_flush(current_chunk), offset_seconds))
                     current_chunk.clear()
                     speech_ms = 0
     
     # Finalize last chunk
     if current_chunk:
-        chunks.append(_flush(current_chunk))
+        offset_seconds = chunk_start_sample / SAMPLE_RATE
+        chunks.append((_flush(current_chunk), offset_seconds))
     
     return chunks
 
