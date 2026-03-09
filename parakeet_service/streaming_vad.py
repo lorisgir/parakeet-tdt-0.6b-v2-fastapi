@@ -1,6 +1,5 @@
 from __future__ import annotations
 import io, wave, tempfile, numpy as np, torch
-from typing import List
 from torch.hub import load as torch_hub_load
 
 vad_model, vad_utils = torch_hub_load("snakers4/silero-vad", "silero_vad")
@@ -36,7 +35,7 @@ class StreamingVAD:
         self.speech_ms = 0
 
 
-    def _flush(self) -> List[str]:
+    def _flush(self) -> list[str]:
         if not self.buffer:
             return []
         tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
@@ -50,8 +49,8 @@ class StreamingVAD:
         self.vad.reset_states()
         return [tmp.name]
 
-    def feed(self, frame_bytes: bytes) -> List[str]:
-        out: List[str] = []
+    def feed(self, frame_bytes: bytes) -> list[str]:
+        out: list[str] = []
 
         pcm_f32 = np.frombuffer(frame_bytes, np.int16).astype("float32") / 32768
         for start in range(0, len(pcm_f32), WINDOW_SAMPLES):

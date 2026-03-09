@@ -1,5 +1,4 @@
 import asyncio, contextlib, logging, tempfile, pathlib, time, torch
-from typing import Union, List
 
 from parakeet_service import model as mdl
 
@@ -12,7 +11,7 @@ condition = asyncio.Condition()          # wakes websocket consumers
 results: dict[str, str] = {}             # path -> text
 
 # -------- helper -------------------------------------------------------------
-def _as_path(blob: Union[str, bytes]) -> str:
+def _as_path(blob: str | bytes) -> str:
     """Ensures we always hand a *file path* to NeMo."""
     if isinstance(blob, str):
         return blob
@@ -30,7 +29,7 @@ async def batch_worker(model, batch_ms: float = 15.0, max_batch: int = 4):
 
     while True:
         path = await transcription_queue.get()      # blocks until 1st item
-        batch: List[str] = [_as_path(path)]
+        batch: list[str] = [_as_path(path)]
 
         # ---------- micro-batch gathering with timeout ----------
         deadline = time.monotonic() + batch_ms / 1000

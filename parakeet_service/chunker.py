@@ -15,7 +15,6 @@ Offline VAD-aware splitters
 
 from __future__ import annotations
 import tempfile, wave, pathlib, numpy as np
-from typing import List
 import soundfile as sf
 
 
@@ -122,7 +121,7 @@ def _flush(buf: bytearray) -> pathlib.Path:
         wf.writeframes(bytes(buf))
     return pathlib.Path(tmp.name)
 
-def vad_chunk_streaming(path: pathlib.Path) -> List[pathlib.Path]:
+def vad_chunk_streaming(path: pathlib.Path) -> list[pathlib.Path]:
     """
     Stream the file in small stripes and split on VADIterator boundaries.
     Uses the SAME PyTorch Silero model, but keeps only a few seconds in RAM.

@@ -43,8 +43,8 @@ A production-ready FastAPI service for high-accuracy English speech-to-text usin
 
 ## Prerequisites
 
-- Python 3.10+  
-- NVIDIA GPU with CUDA 12.1+ (recommended)
+- Python 3.12+  
+- NVIDIA GPU with CUDA 12.8+ (recommended)
 - Docker Engine 24.0+ (for container deployment)
 
 ## Installation
@@ -54,12 +54,12 @@ A production-ready FastAPI service for high-accuracy English speech-to-text usin
 git clone https://github.com/your-repo/parakeet-fastapi.git
 cd parakeet-fastapi
 
-# Create and activate virtual environment
-python -m venv .venv
+# Create and activate virtual environment (using uv)
+uv venv .venv
 source .venv/bin/activate
 
 # Install dependencies
-pip install -r requirements.txt
+uv pip install ".[dev]"
 ```
 
 ### Docker Deployment

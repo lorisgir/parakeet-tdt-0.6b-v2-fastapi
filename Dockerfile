@@ -1,5 +1,5 @@
 # Stage 1: Builder stage for installing dependencies
-FROM python:3.10.7-slim AS builder
+FROM python:3.12-slim AS builder
 
 # Install system dependencies including ffmpeg
 RUN apt-get update && \
@@ -8,22 +8,25 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY ./requirements.txt .
+
+# Install uv for fast package management
+RUN pip install --no-cache-dir uv
 
 # Create virtual environment
-RUN python -m venv /opt/venv
+RUN uv venv /opt/venv
 ENV PATH="/opt/venv/bin:${PATH}"
 
-# Install Python dependencies
-RUN pip install --no-cache-dir --upgrade pip \
- && pip install torch==2.7.0 torchaudio==2.7.0 --index-url https://download.pytorch.org/whl/cu128 --no-cache-dir \
- && pip install nemo_toolkit["asr"] \
- && pip install 'uvicorn[standard]' --no-cache-dir \
- && pip install --no-cache-dir -r requirements.txt \
- && pip cache purge
+# Install NeMo ASR toolkit (installed before project deps for better layer caching)
+RUN uv pip install "nemo_toolkit[asr]"
+
+# Copy project definition and source, then install all dependencies
+# uv will automatically use the pytorch-cu128 index for torch/torchaudio
+COPY ./pyproject.toml .
+COPY ./parakeet_service ./parakeet_service
+RUN uv pip install ".[dev]"
 
 # Stage 2: Runtime stage
-FROM python:3.10.7-slim
+FROM python:3.12-slim
 
 # Install runtime dependencies
 RUN apt-get update && \

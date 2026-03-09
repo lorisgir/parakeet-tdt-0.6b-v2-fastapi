@@ -5,7 +5,6 @@ Audio helpers:
 """
 from __future__ import annotations
 from pathlib import Path
-from typing import Iterable, Tuple, List
 import tempfile
 
 import torchaudio
@@ -17,10 +16,10 @@ from fastapi import BackgroundTasks, HTTPException, status
 from .config import TARGET_SR, logger
 
 
-SUPPORTED_EXTS: List[str] = [".wav", ".flac", ".mp3", ".ogg", ".opus"]
+SUPPORTED_EXTS: list[str] = [".wav", ".flac", ".mp3", ".ogg", ".opus"]
 
 
-def convert_audio_streaming(src: Path) -> Tuple[Path, Path]:
+def convert_audio_streaming(src: Path) -> tuple[Path, Path]:
     """
     Stream audio conversion to mono/16kHz with minimal memory usage
     Processes audio in chunks to avoid loading entire file into memory
@@ -62,7 +61,7 @@ def convert_audio_streaming(src: Path) -> Tuple[Path, Path]:
         return ensure_mono_16k_standard(src)
 
 
-def ensure_mono_16k_standard(src: Path) -> Tuple[Path, Path]:
+def ensure_mono_16k_standard(src: Path) -> tuple[Path, Path]:
     """
     Standard full-file audio conversion (fallback)
     """
@@ -85,7 +84,7 @@ def ensure_mono_16k_standard(src: Path) -> Tuple[Path, Path]:
     return src, dst
 
 
-def ensure_mono_16k(src: Path) -> Tuple[Path, Path]:
+def ensure_mono_16k(src: Path) -> tuple[Path, Path]:
     """
     Down-mix and resample to mono/16 kHz using streaming when possible.
     """
